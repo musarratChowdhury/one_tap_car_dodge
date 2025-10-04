@@ -19,6 +19,8 @@ let obs_cars = [];
 k.scene("game", () => {
   //TODO: Need to spawn obstacles randomly, with diff speed, from the top
   // A collision animation, maybe rotate the car at 360 degree
+  //Draw road lines in the middle of the road; they will not be used for collision detection
+  //score system, difficulty increase by time
   const carWidth = 100;
   const carHeight = 200;
   const roadBarW = 10;
@@ -26,6 +28,10 @@ k.scene("game", () => {
   const vSpace = 10;
   const lane_switch_d = 100;
   const arr_of_obstacles = [];
+  const lane_pos = {
+    left: { x: k.canvas.width / 2 - 100, y: 0 },
+    right: { x: k.canvas.width / 2 + 100, y: 0 },
+  };
   // Load sprites with frame slicing
   k.loadSprite("pcar1", "./assets/images/cars/images/pcar1.png");
   k.loadSprite("barrier", "./assets/images/cars/images/barrier.png");
@@ -38,6 +44,36 @@ k.scene("game", () => {
     sliceY: 1, // 4 rows, totaling 12 frames
   });
 
+  const obstacles = [
+    {
+      name: "police_car_1",
+      initial_vel: { x: 0, y: 200 },
+      sprite: "pcar1",
+      initial_lane: "left",
+      scale: { x: 0.5, y: 0.5 },
+    },
+    {
+      name: "police_car_2",
+      initial_vel: { x: 0, y: 200 },
+      sprite: "pcar2",
+      initial_lane: "right",
+      scale: { x: 0.5, y: 0.5 },
+    },
+    {
+      name: "cone",
+      initial_vel: { x: 0, y: 200 },
+      sprite: "cone",
+      initial_lane: "right",
+      scale: { x: 0.5, y: 0.5 },
+    },
+    {
+      name: "barrier",
+      initial_vel: { x: 0, y: 200 },
+      sprite: "barrier",
+      initial_lane: "right",
+      scale: { x: 0.5, y: 0.5 },
+    },
+  ];
   // Add player car (represented as a rectangle)
   const player = k.add([
     k.sprite("car1", { frame: 0 }),
@@ -78,32 +114,37 @@ k.scene("game", () => {
       gameSpeed += 10;
     }
   });
+  //function to choose a random lane
+
+  const choose_lane = () => {
+    const r_lane = +k.rand(0, obstacles.length - 1).toFixed(0);
+    if (r_lane == 0) {
+      return lane_pos.left;
+    } else {
+      return lane_pos.right;
+    }
+  };
 
   //the loop responsible for spawning cars and obstacles
   k.loop(1, () => {
-    obs_cars.push();
-    const newCar = k.add([
-      k.sprite("pcar1"),
+    //randomly select 1 obstacle to spawn;
+    console.log(obstacles); //debug purpose
+    const r_i = +k.rand(0, obstacles.length - 1).toFixed(0);
+    const rand_obs = obstacles[r_i];
+    const rand_lane = choose_lane();
+    const new_obs = k.add([
+      k.sprite(rand_obs.sprite),
       k.body(),
       k.area(),
-      k.pos(100, -10),
+      k.pos(rand_lane.x, rand_lane.y), //replace with const initial_spawn_pos
       k.offscreen({ destroy: true }),
-      // k.color(k.rand(50, 255), k.rand(50, 255), k.rand(50, 255)),
-      "obs_car",
+      rand_obs.name,
     ]);
 
-    newCar.vel.y = 200;
-    newCar.onClick(() => {
-      // newCar.destroy();
+    new_obs.vel.y = rand_obs.initial_vel.y;
+    new_obs.onClick(() => {
+      // new_obs.destroy();remove this later if not need
     });
-
-    newCar.onUpdate(() => {
-      if (newCar.pos.y >= k.canvas.height) {
-        newCar.destroy();
-      }
-    });
-    // obs_cars.push(newCar);
-    // console.log(obs_cars);
   });
 
   // Collision detection
