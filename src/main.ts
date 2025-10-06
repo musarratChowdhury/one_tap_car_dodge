@@ -109,15 +109,16 @@ k.scene("game", () => {
   });
 
   // Increase difficulty over time
-  k.loop(10, () => {
+  k.loop(1, () => {
     if (!isGameOver) {
       gameSpeed += 10;
     }
+    console.log("Hello");
   });
   //function to choose a random lane
 
   const choose_lane = () => {
-    const r_lane = +k.rand(0, obstacles.length - 1).toFixed(0);
+    const r_lane = +k.rand(0, 1).toFixed(0);
     if (r_lane == 0) {
       return lane_pos.left;
     } else {
@@ -125,8 +126,16 @@ k.scene("game", () => {
     }
   };
 
+  // const sample = k.add([
+  //   k.rect(100, 100),
+  //   k.color("#000fff"),
+  //   k.body(),
+  //   k.area(),
+  //   k.pos(200, 200),
+  // ]);
+
   //the loop responsible for spawning cars and obstacles
-  k.loop(1, () => {
+  k.loop(k.rand(0.5, 3), () => {
     //randomly select 1 obstacle to spawn;
     console.log(obstacles); //debug purpose
     const r_i = +k.rand(0, obstacles.length - 1).toFixed(0);
@@ -142,9 +151,7 @@ k.scene("game", () => {
     ]);
 
     new_obs.vel.y = rand_obs.initial_vel.y;
-    new_obs.onClick(() => {
-      // new_obs.destroy();remove this later if not need
-    });
+    console.log(new_obs);
   });
 
   // Collision detection
@@ -224,9 +231,9 @@ k.scene("game", () => {
   ]);
 
   // Restart game on spacebar
-  k.onKeyPress("space", () => {
-    k.go("game");
-  });
+  // k.onKeyPress("space", () => {
+  //   k.go("game");
+  // });
 
   // Game title
   k.add([
