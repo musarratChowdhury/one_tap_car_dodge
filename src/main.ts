@@ -154,6 +154,20 @@ k.scene("game", () => {
     console.log(new_obs);
   });
 
+  k.loop(0.5, () => {
+    const new_line = k.add([
+      k.sprite("line"),
+      k.pos(k.canvas.width / 2, -100),
+      k.scale(0.5),
+      k.z(-100),
+      k.offscreen({ destroy: true }),
+      "line",
+    ]);
+    new_line.onUpdate(() => {
+      new_line.move(0, 100);
+    });
+  });
+
   // Collision detection
   player.onCollide("enemy", () => {
     if (isGameOver) return;
