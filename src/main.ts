@@ -20,7 +20,7 @@ k.scene("game", () => {
   // A collision animation, maybe rotate the car at 360 degree
   //Draw road lines in the middle of the road; they will not be used for collision detection
   //score system, difficulty increase by time
-  let game_speed = 1;
+  let game_speed = 200;
   const carWidth = 100;
   const player_initial_height = 80;
   const obj_scale_factor = 0.8;
@@ -115,6 +115,7 @@ k.scene("game", () => {
     k.pos(lane_pos.right.x + 3, k.height() - player_initial_height),
     k.area(),
     k.body(),
+    k.rotate(),
     k.scale(obj_scale_factor),
     k.anchor("center"),
     "player_car",
@@ -187,11 +188,12 @@ k.scene("game", () => {
   });
 
   //drawing road middle lines
-  const roadLines = [];
-  for (let i = 0; i < 20; i++) {
+  const lineSpacing = 60;
+  const roadLines: any[] = [];
+  for (let i = 0; i < Math.ceil(k.height() / lineSpacing) + 2; i++) {
     const l = k.add([
       k.sprite("line"),
-      k.pos(k.canvas.width / 2, i * 50),
+      k.pos(k.canvas.width / 2, i * lineSpacing),
       k.scale(0.5),
       k.z(-100),
       k.anchor("center"),
@@ -202,19 +204,12 @@ k.scene("game", () => {
     roadLines.push(l);
   }
 
-  k.loop(0.5, () => {
-    const new_line = k.add([
-      k.sprite("line"),
-      k.pos(k.canvas.width / 2, -50),
-      k.scale(0.5),
-      k.z(-100),
-      k.anchor("center"),
-      k.offscreen({ destroy: true }),
-      "line",
-    ]);
-    new_line.onUpdate(() => {
-      new_line.move(0, 100);
-    });
+  k.onUpdate(() => {
+    for (const line of roadLines) {
+      if (line.pos.y > k.height() + lineSpacing / 2) {
+        line.pos.y = -lineSpacing;
+      }
+    }
   });
 
   // Collision detection
@@ -222,6 +217,16 @@ k.scene("game", () => {
     if (isGameOver) return;
     isGameOver = true;
     k.debug.log("Game Over!");
+    const spinTime = 1;
+    const totalRot = 360;
+    const startRot = player.angle;
+    k.tween(
+      startRot,
+      startRot + totalRot,
+      spinTime,
+      (v) => (player.angle = v),
+      k.easings.easeOutBounce
+    );
     k.add([
       k.text("GAME OVER", { size: 60 }),
       k.pos(k.width() / 2, k.height() / 2),
@@ -230,7 +235,7 @@ k.scene("game", () => {
       k.opacity(1),
       k.lifespan(2),
     ]);
-    k.wait(2, () => {
+    k.wait(spinTime + 1.5, () => {
       k.go("game"); // Restart the game after 2 seconds
     });
   });
