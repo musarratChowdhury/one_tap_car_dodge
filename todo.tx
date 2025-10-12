@@ -1,2 +1,10 @@
 need to find out how create an array of gameobjects,
 and move them across the Y axis;
+define the position of the left and right lane\
+game over logics 
+player initial lifes
+minimum time diff to ensure player can swithc lane 
+game difficulty increase by time
+the road strips array should contain the first set
+fix the player car sprite issue
+fix the road line issue

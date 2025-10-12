@@ -21,9 +21,10 @@ k.scene("game", () => {
   // A collision animation, maybe rotate the car at 360 degree
   //Draw road lines in the middle of the road; they will not be used for collision detection
   //score system, difficulty increase by time
+  let game_speed = 1;
   const carWidth = 100;
   const player_initial_height = 80;
-  const obj_scale_factor = 2;
+  const obj_scale_factor = 0.8;
   const carHeight = 200;
   const roadBarW = 10;
   const roadBarH = 40;
@@ -47,13 +48,6 @@ k.scene("game", () => {
   });
 
   //debug
-
-  drawLine({
-    p1: vec2(100),
-    p2: vec2(500),
-    width: 4,
-    color: rgb(0, 0, 255),
-  });
   //left lane line
   k.add([
     k.rect(3, k.height()),
@@ -75,6 +69,7 @@ k.scene("game", () => {
   const obstacles = [
     {
       name: "police_car_1",
+      type: "obstacle",
       initial_vel: { x: 0, y: 200 },
       sprite: "pcar1",
       initial_lane: "left",
@@ -82,6 +77,7 @@ k.scene("game", () => {
     },
     {
       name: "police_car_2",
+      type: "obstacle",
       initial_vel: { x: 0, y: 200 },
       sprite: "pcar2",
       initial_lane: "right",
@@ -89,6 +85,7 @@ k.scene("game", () => {
     },
     {
       name: "cone",
+      type: "obstacle",
       initial_vel: { x: 0, y: 200 },
       sprite: "cone",
       initial_lane: "right",
@@ -96,6 +93,7 @@ k.scene("game", () => {
     },
     {
       name: "barrier",
+      type: "obstacle",
       initial_vel: { x: 0, y: 200 },
       sprite: "barrier",
       initial_lane: "right",
@@ -117,7 +115,8 @@ k.scene("game", () => {
     // k.outline(4, 255, 255, 255), // White outline
     k.pos(lane_pos.right.x + 3, k.height() - player_initial_height),
     k.area(),
-    // k.body(),
+    k.body(),
+    k.scale(obj_scale_factor),
     k.anchor("center"),
     "player_car",
     {
@@ -173,22 +172,44 @@ k.scene("game", () => {
       k.sprite(rand_obs.sprite),
       k.body(),
       k.area(),
+      k.scale(obj_scale_factor),
+      k.anchor("center"),
       k.pos(rand_lane.x, rand_lane.y), //replace with const initial_spawn_pos
       k.offscreen({ destroy: true }),
-      rand_obs.name,
+      rand_obs.type,
+      {
+        name: rand_obs.name,
+      },
     ]);
 
-    new_obs.pos.x = rand_lane.x - new_obs.width / 2;
+    new_obs.pos.x = rand_lane.x;
     new_obs.vel.y = rand_obs.initial_vel.y;
     console.log(new_obs);
   });
 
+  //drawing road middle lines
+  const roadLines = [];
+  for (let i = 0; i < 20; i++) {
+    const l = k.add([
+      k.sprite("line"),
+      k.pos(k.canvas.width / 2, i * 50),
+      k.scale(0.5),
+      k.z(-100),
+      k.anchor("center"),
+      k.offscreen({ destroy: true }),
+      "line",
+    ]);
+    l.onUpdate(() => l.move(0, 100));
+    roadLines.push(l);
+  }
+
   k.loop(0.5, () => {
     const new_line = k.add([
       k.sprite("line"),
-      k.pos(k.canvas.width / 2, -100),
+      k.pos(k.canvas.width / 2, -50),
       k.scale(0.5),
       k.z(-100),
+      k.anchor("center"),
       k.offscreen({ destroy: true }),
       "line",
     ]);
@@ -198,7 +219,7 @@ k.scene("game", () => {
   });
 
   // Collision detection
-  player.onCollide("enemy", () => {
+  player.onCollide("obj", () => {
     if (isGameOver) return;
     isGameOver = true;
     k.debug.log("Game Over!");
@@ -255,23 +276,6 @@ k.scene("game", () => {
       k.anchor("center"),
     ]);
   });
-
-  // Add road borders
-  k.add([
-    k.rect(k.width(), 10),
-    k.color(200, 200, 200),
-    k.pos(0, 0),
-    k.fixed(),
-    k.area(),
-  ]);
-
-  k.add([
-    k.rect(k.width(), 10),
-    k.color(200, 200, 200),
-    k.pos(0, k.height() - 10),
-    k.fixed(),
-    k.area(),
-  ]);
 
   // Restart game on spacebar
   // k.onKeyPress("space", () => {
