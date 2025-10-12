@@ -22,16 +22,18 @@ k.scene("game", () => {
   //Draw road lines in the middle of the road; they will not be used for collision detection
   //score system, difficulty increase by time
   const carWidth = 100;
+  const player_initial_height = 80;
+  const obj_scale_factor = 2;
   const carHeight = 200;
   const roadBarW = 10;
   const roadBarH = 40;
   const vSpace = 10;
-  const lane_switch_d = 100;
   const arr_of_obstacles = [];
   const lane_pos = {
     left: { x: k.canvas.width / 2 - 100, y: 0 },
     right: { x: k.canvas.width / 2 + 100, y: 0 },
   };
+  const lane_switch_d = Math.abs(lane_pos.right.x - lane_pos.left.x);
   // Load sprites with frame slicing
   k.loadSprite("pcar1", "./assets/images/cars/images/pcar1.png");
   k.loadSprite("barrier", "./assets/images/cars/images/barrier.png");
@@ -44,43 +46,78 @@ k.scene("game", () => {
     sliceY: 1, // 4 rows, totaling 12 frames
   });
 
+  //debug
+
+  drawLine({
+    p1: vec2(100),
+    p2: vec2(500),
+    width: 4,
+    color: rgb(0, 0, 255),
+  });
+  //left lane line
+  k.add([
+    k.rect(3, k.height()),
+    k.color(200, 200, 200),
+    k.pos(lane_pos.left.x, lane_pos.left.y),
+    k.fixed(),
+    k.area(),
+  ]);
+  //right lane line
+  k.add([
+    k.rect(3, k.height()),
+    k.color(200, 200, 200),
+    k.pos(lane_pos.right.x, lane_pos.right.y),
+    k.fixed(),
+    k.area(),
+  ]);
+  //
+
   const obstacles = [
     {
       name: "police_car_1",
       initial_vel: { x: 0, y: 200 },
       sprite: "pcar1",
       initial_lane: "left",
-      scale: { x: 0.5, y: 0.5 },
+      scale: { x: obj_scale_factor, y: obj_scale_factor },
     },
     {
       name: "police_car_2",
       initial_vel: { x: 0, y: 200 },
       sprite: "pcar2",
       initial_lane: "right",
-      scale: { x: 0.5, y: 0.5 },
+      scale: { x: obj_scale_factor, y: obj_scale_factor },
     },
     {
       name: "cone",
       initial_vel: { x: 0, y: 200 },
       sprite: "cone",
       initial_lane: "right",
-      scale: { x: 0.5, y: 0.5 },
+      scale: { x: obj_scale_factor, y: obj_scale_factor },
     },
     {
       name: "barrier",
       initial_vel: { x: 0, y: 200 },
       sprite: "barrier",
       initial_lane: "right",
-      scale: { x: 0.5, y: 0.5 },
+      scale: { x: obj_scale_factor, y: obj_scale_factor },
     },
   ];
+  const choose_lane = () => {
+    const r_lane = +k.rand(0, 1).toFixed(0);
+    if (r_lane == 0) {
+      return lane_pos.left;
+    } else {
+      return lane_pos.right;
+    }
+  };
   // Add player car (represented as a rectangle)
+  const player_initial_lane = choose_lane();
   const player = k.add([
     k.sprite("car1", { frame: 0 }),
     // k.outline(4, 255, 255, 255), // White outline
-    k.pos(k.width() / 2, k.height() - 100),
+    k.pos(lane_pos.right.x + 3, k.height() - player_initial_height),
     k.area(),
-    k.body(),
+    // k.body(),
     k.anchor("center"),
     "player_car",
     {
@@ -91,10 +128,10 @@ k.scene("game", () => {
 
   player.onClick(() => {
     if (player.lane_position == "right") {
-      player.pos.x += lane_switch_d;
+      player.pos.x -= lane_switch_d;
       player.lane_position = "left";
     } else {
-      player.pos.x -= lane_switch_d;
+      player.pos.x += lane_switch_d;
       player.lane_position = "right";
     }
   });
@@ -116,15 +153,6 @@ k.scene("game", () => {
     console.log("Hello");
   });
   //function to choose a random lane
-
-  const choose_lane = () => {
-    const r_lane = +k.rand(0, 1).toFixed(0);
-    if (r_lane == 0) {
-      return lane_pos.left;
-    } else {
-      return lane_pos.right;
-    }
-  };
 
   // const sample = k.add([
   //   k.rect(100, 100),
@@ -150,6 +178,7 @@ k.scene("game", () => {
       rand_obs.name,
     ]);
 
+    new_obs.pos.x = rand_lane.x - new_obs.width / 2;
     new_obs.vel.y = rand_obs.initial_vel.y;
     console.log(new_obs);
   });
