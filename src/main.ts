@@ -10,7 +10,6 @@ const k = kaplay({
 
 // Game variables
 let score = 0;
-let gameSpeed = 200;
 let isGameOver = false;
 
 let obs_cars = [];
@@ -147,7 +146,7 @@ k.scene("game", () => {
   // Increase difficulty over time
   k.loop(1, () => {
     if (!isGameOver) {
-      gameSpeed += 10;
+      game_speed += 10;
     }
     console.log("Hello");
   });
@@ -219,7 +218,7 @@ k.scene("game", () => {
   });
 
   // Collision detection
-  player.onCollide("obj", () => {
+  player.onCollide("obstacle", () => {
     if (isGameOver) return;
     isGameOver = true;
     k.debug.log("Game Over!");
@@ -228,6 +227,7 @@ k.scene("game", () => {
       k.pos(k.width() / 2, k.height() / 2),
       k.anchor("center"),
       k.color(255, 0, 0),
+      k.opacity(1),
       k.lifespan(2),
     ]);
     k.wait(2, () => {
@@ -235,9 +235,9 @@ k.scene("game", () => {
     });
   });
 
-  // Score when enemy passes player
-  k.onUpdate("enemy", (enemy) => {
-    if (enemy.pos.y > k.height && !isGameOver) {
+  // Score when obstacle passes player
+  k.onUpdate("obstacle", (obstacle) => {
+    if (obstacle.pos.y > k.height && !isGameOver) {
       score++;
     }
   });
@@ -255,26 +255,13 @@ k.scene("game", () => {
 
   // Display speed
   const speedDisplay = k.add([
-    k.text(`Speed: ${Math.round(gameSpeed)}`, { size: 24 }),
+    k.text(`Speed: ${Math.round(game_speed)}`, { size: 24 }),
     k.pos(20, 50),
     k.fixed(),
   ]);
 
   k.onUpdate(() => {
-    speedDisplay.text = `Speed: ${Math.round(gameSpeed)}`;
-  });
-
-  // Add road markings (center line)
-  k.loop(0.2, () => {
-    if (isGameOver) return;
-    k.add([
-      k.rect(10, 30),
-      k.color(255, 255, 255),
-      k.pos(k.width() / 2, -20),
-      k.move(0, gameSpeed * 0.8), // Road markings move slightly slower than cars
-      k.offscreen({ destroy: true }),
-      k.anchor("center"),
-    ]);
+    speedDisplay.text = `Speed: ${Math.round(game_speed)}`;
   });
 
   // Restart game on spacebar
